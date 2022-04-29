@@ -42,7 +42,7 @@ namespace entities.player.controller
             
         }
 
-        private void FixedUpdate() 
+        private void FixedUpdate()
         {
             bool _receivedInput = false;
             if (isOnEditor) _receivedInput = inputReceiver.GetKeyPressed();

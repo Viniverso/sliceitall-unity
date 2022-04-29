@@ -59,5 +59,11 @@ namespace entities.brick.controller
                 rightMeshRenderer.material.color = brickModel.GetHitColor;
             }
         }
+
+        private void OnDestroy()
+        {
+            if (OnNotifyDestruct != null)
+                OnNotifyDestruct = null;
+        }
     }
 }
