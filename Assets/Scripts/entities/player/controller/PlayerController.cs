@@ -44,7 +44,7 @@ namespace entities.player.controller
             
         }
 
-        private void LateUpdate() 
+        private void FixedUpdate() 
         {
             bool _receivedInput = false;
             if (isOnEditor) _receivedInput = inputReceiver.GetKeyPressed();
@@ -54,8 +54,14 @@ namespace entities.player.controller
             if (_receivedInput)
             {
 
-                moveCommand = new MoveCommandBehaviour(this, (Vector3.up + this.transform.position));
+                moveCommand = new MoveCommandBehaviour(this, playerModel.GetMoveForce);
                 moveCommand.Execute();
+            }
+
+
+            if(playerModel.CurrentPlayerState == PlayerState.FLYING)
+            {
+                RotateForce(Quaternion.Euler(playerModel.GetRotationForce * Time.fixedDeltaTime));
             }
         }
 
@@ -63,20 +69,20 @@ namespace entities.player.controller
         {
             playerModel.CurrentPlayerState = PlayerState.FLYING;
 
-            this.playerRigidbody.MovePosition(_force);
+            Vector3 _moveForce = _force;
+
+            playerRigidbody.AddForce(_moveForce);
         }
 
         public void RotateForce(Quaternion _rotationForce)
         {
-            this.playerRigidbody.MoveRotation(_rotationForce);
-        }
 
+            playerRigidbody.MoveRotation(playerRigidbody.rotation * _rotationForce);
+        }
 
         private void OnCollisionEnter(Collision collision)
         {
             GameObject _collidedObject = collision.gameObject;
-
-            Debug.Log("Collision " + _collidedObject.name);
 
             if (_collidedObject.name == "ground")
             {
