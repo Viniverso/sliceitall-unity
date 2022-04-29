@@ -43,10 +43,12 @@ namespace entities.brick.controller
         {
             if (other.gameObject.tag == "Player")
             {
+                OnNotifyDestruct(this);
                 if(brickModel.CurrentBrickState == BrickState.IDLE)
                 {
                     MoveForce(brickModel.GetHitForce);
                     brickModel.CurrentBrickState = BrickState.UNQUALIFIED;
+                    this.GetComponent<Collider>().enabled = false;
                 }
             }
         }

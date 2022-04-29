@@ -1,32 +1,91 @@
+using System.Collections.Generic;
 using Internal.Singleton;
+
+using entities.impl;
 using entities.brick.controller;
+using Manager.model;
+
 using UnityEngine;
 
-public class GameManager : Singleton<GameManager>
+namespace Manager
 {
-    [SerializeField] private int brickPontuation = 10;
-
-    private int currentPlayerScore;
-
-    // Start is called before the first frame update
-    void Start()
+    public class GameManager : Singleton<GameManager>
     {
-        BrickController.OnNotifyDestruct += OnNotifyDestruct;
-        currentPlayerScore = 0;
-    }
+        [SerializeField] private int brickPontuation = 10;
 
-    public void OnNotifyDestruct()
-    {
-        SetPlayerScore();
-    }
+        private int currentPlayerScore;
 
-    private void SetPlayerScore()
-    {
-        currentPlayerScore += brickPontuation;
-    }
+        private GameState currentGameState;
 
-    private void OnDestroy()
-    {
-        BrickController.OnNotifyDestruct -= OnNotifyDestruct;
+        private List<DestructibleObject> availableBrickControllers;
+
+
+        public GameState CurrentGameState
+        {
+            get { return currentGameState; }
+            set
+            {
+                if (currentGameState != value)
+                    currentGameState = value;
+            }
+        }
+
+        private void Awake()
+        {
+            GameStart();
+        }
+
+
+        private void GameStart()
+        {
+            CurrentGameState = GameState.START;
+
+            BrickController.OnNotifyDestruct += OnNotifyDestruct;
+
+            availableBrickControllers = new List<DestructibleObject>();
+            BrickController[] _bricksOnScene = FindObjectsOfType<BrickController>();
+
+            availableBrickControllers.AddRange(_bricksOnScene);
+        }
+
+        // Start is called before the first frame update
+        void Start()
+        {
+            CurrentGameState = GameState.INGAME;
+
+            currentPlayerScore = 0;
+        }
+
+        public void OnNotifyDestruct(DestructibleObject brickController)
+        {
+            SetPlayerScore();
+
+            RemoveBrick((BrickController)brickController);
+        }
+
+        private void SetPlayerScore()
+        {
+            currentPlayerScore += brickPontuation;
+
+            UIManager.Instance.SetPlayerScore(currentPlayerScore);
+        }
+
+        private void RemoveBrick(BrickController _brick)
+        {
+            if (availableBrickControllers.Contains(_brick))
+            {
+                availableBrickControllers.Remove(_brick);
+            }
+
+            if (availableBrickControllers.Count == 0)
+            {
+                CurrentGameState = GameState.END;
+            }
+        }
+
+        private void OnDestroy()
+        {
+            BrickController.OnNotifyDestruct -= OnNotifyDestruct;
+        }
     }
 }

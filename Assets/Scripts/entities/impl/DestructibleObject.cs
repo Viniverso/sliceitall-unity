@@ -7,7 +7,7 @@ namespace entities.impl
 {
     public abstract class DestructibleObject : MonoBehaviour, IDestructibleObject
     {
-        public static Action OnNotifyDestruct;
+        public static Action<DestructibleObject> OnNotifyDestruct;
 
         [SerializeField] private int id = 0;
 
@@ -18,7 +18,7 @@ namespace entities.impl
         public virtual void OnTriggerEnter(Collider other)
         {
             if (OnNotifyDestruct != null)
-                OnNotifyDestruct();
+                OnNotifyDestruct(this);
         }
     }
 }
